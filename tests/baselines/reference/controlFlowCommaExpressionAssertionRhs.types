@@ -1,0 +1,26 @@
+=== tests/cases/compiler/controlFlowCommaExpressionAssertionRhs.ts ===
+declare function assertIsNumber(x: any): asserts x is number;
+>assertIsNumber : (x: any) => asserts x is number
+>x : any
+
+declare const x1: any;
+>x1 : any
+
+declare const x2: any;
+>x2 : any
+
+assertIsNumber(x1), assertIsNumber(x2);
+>assertIsNumber(x1), assertIsNumber(x2) : void
+>assertIsNumber(x1) : void
+>assertIsNumber : (x: any) => asserts x is number
+>x1 : any
+>assertIsNumber(x2) : void
+>assertIsNumber : (x: any) => asserts x is number
+>x2 : number
+
+x1;
+>x1 : number
+
+x2;
+>x2 : number
+

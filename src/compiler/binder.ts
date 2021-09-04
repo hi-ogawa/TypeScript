@@ -1365,7 +1365,7 @@ namespace ts {
         }
 
         function maybeBindExpressionFlowIfCall(node: Expression) {
-            // A top level or LHS of comma expression call expression with a dotted function name and at least one argument
+            // A top level or LHS/RHS of comma expression call expression with a dotted function name and at least one argument
             // is potentially an assertion and is therefore included in the control flow.
             if (node.kind === SyntaxKind.CallExpression) {
                 const call = node as CallExpression;
@@ -1560,6 +1560,7 @@ namespace ts {
                 if (!state.skip) {
                     if (operatorToken.kind === SyntaxKind.CommaToken) {
                         maybeBindExpressionFlowIfCall(node.left);
+                        maybeBindExpressionFlowIfCall(node.right);
                     }
                     bind(operatorToken);
                 }
