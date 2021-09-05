@@ -652,6 +652,9 @@ namespace ts.FindAllReferences {
             // constructors should use the class symbol, detected by name, if present
             const symbol = checker.getSymbolAtLocation(isConstructorDeclaration(node) && node.parent.name || node);
 
+            // @ts-ignore
+            console.log("[getReferencedSymbolsForNode]", symbol);
+
             // Could not find a symbol e.g. unknown identifier
             if (!symbol) {
                 // String literal might be a property (and thus have a symbol), so do this here rather than in getReferencedSymbolsSpecial.
@@ -1414,8 +1417,9 @@ namespace ts.FindAllReferences {
                 case SyntaxKind.NoSubstitutionTemplateLiteral:
                 case SyntaxKind.StringLiteral: {
                     const str = node as StringLiteralLike;
-                    return (isLiteralNameOfPropertyDeclarationOrIndexAccess(str) || isNameOfModuleDeclaration(node) || isExpressionOfExternalModuleImportEqualsDeclaration(node) || (isCallExpression(node.parent) && isBindableObjectDefinePropertyCall(node.parent) && node.parent.arguments[1] === node)) &&
-                        str.text.length === searchSymbolName.length;
+                    return str.text.length === searchSymbolName.length;
+                    // return (isLiteralNameOfPropertyDeclarationOrIndexAccess(str) || isNameOfModuleDeclaration(node) || isExpressionOfExternalModuleImportEqualsDeclaration(node) || (isCallExpression(node.parent) && isBindableObjectDefinePropertyCall(node.parent) && node.parent.arguments[1] === node)) &&
+                    //     str.text.length === searchSymbolName.length;
                 }
 
                 case SyntaxKind.NumericLiteral:
@@ -1452,11 +1456,15 @@ namespace ts.FindAllReferences {
          * searchLocation: a node where the search value
          */
         function getReferencesInContainer(container: Node, sourceFile: SourceFile, search: Search, state: State, addReferencesHere: boolean): void {
+            // @ts-ignore
+            console.log("[getReferencesInContainer]", search);
             if (!state.markSearchedSymbols(sourceFile, search.allSearchSymbols)) {
                 return;
             }
 
             for (const position of getPossibleSymbolReferencePositions(sourceFile, search.text, container)) {
+                // @ts-ignore
+                console.log("[position]", position);
                 getReferencesAtLocation(sourceFile, position, search, state, addReferencesHere);
             }
         }
@@ -1467,6 +1475,33 @@ namespace ts.FindAllReferences {
 
         function getReferencesAtLocation(sourceFile: SourceFile, position: number, search: Search, state: State, addReferencesHere: boolean): void {
             const referenceLocation = getTouchingPropertyName(sourceFile, position);
+            // @ts-ignore
+            console.log("[referenceLocation]", referenceLocation);
+
+            // Handle string literal for `keyof T`
+            if (isStringLiteral(referenceLocation) && referenceLocation.text === search.text) {
+                const refType = getContextualTypeFromParentOrAncestorTypeNode(referenceLocation, state.checker);
+                // @ts-ignore
+                console.log("[refType]", refType);
+                // if (refType === "<keyof T>") {
+                // }
+
+                // if (isStringLiteralLike(ref) && ref.text === node.text) {
+                //     if (type) {
+                //         const refType = getContextualTypeFromParentOrAncestorTypeNode(ref, checker);
+                //         // Not structual but identity of types
+                //         if (type !== checker.getStringType() && type === refType) {
+                //             return nodeEntry(ref, EntryKind.StringLiteral);
+                //         }
+                //     }
+                //     else {
+                //         return nodeEntry(ref, EntryKind.StringLiteral);
+                //     }
+                // }
+
+
+                // return;
+            }
 
             if (!isValidReferencePosition(referenceLocation, search.text)) {
                 // This wasn't the start of a token.  Check to see if it might be a
@@ -1486,6 +1521,15 @@ namespace ts.FindAllReferences {
             if (!hasMatchingMeaning(referenceLocation, state)) return;
 
             let referenceSymbol = state.checker.getSymbolAtLocation(referenceLocation);
+            // @ts-ignore
+            console.log("[referenceSymbol]", referenceSymbol);
+
+            // enumerate reference as string
+
+            // - node is property string literal
+            // - enumerate candidates string literal
+            // - check if contextual type of the candidate  == keyof T
+
             if (!referenceSymbol) {
                 return;
             }
@@ -1503,6 +1547,9 @@ namespace ts.FindAllReferences {
             }
 
             const relatedSymbol = getRelatedSymbol(search, referenceSymbol, referenceLocation, state);
+            // @ts-ignore
+            console.log("[relatedSymbol]", relatedSymbol);
+
             if (!relatedSymbol) {
                 getReferenceForShorthandProperty(referenceSymbol, search, state);
                 return;
@@ -2004,12 +2051,17 @@ namespace ts.FindAllReferences {
 
         function getReferencesForStringLiteral(node: StringLiteralLike, sourceFiles: readonly SourceFile[], checker: TypeChecker, cancellationToken: CancellationToken): SymbolAndEntries[] {
             const type = getContextualTypeFromParentOrAncestorTypeNode(node, checker);
+            // @ts-ignore
+            console.log("[getReferencesForStringLiteral]", type);
             const references = flatMap(sourceFiles, sourceFile => {
                 cancellationToken.throwIfCancellationRequested();
                 return mapDefined(getPossibleSymbolReferenceNodes(sourceFile, node.text), ref => {
+                    // @ts-ignore
+                    console.log("[getReferencesForStringLiteral]", node.text, ref);
                     if (isStringLiteralLike(ref) && ref.text === node.text) {
                         if (type) {
                             const refType = getContextualTypeFromParentOrAncestorTypeNode(ref, checker);
+                            // Not structual but identity of types
                             if (type !== checker.getStringType() && type === refType) {
                                 return nodeEntry(ref, EntryKind.StringLiteral);
                             }

@@ -1461,6 +1461,10 @@ namespace FourSlash {
                 this.goToRangeStart(startRange);
 
                 const renameInfo = this.languageService.getRenameInfo(this.activeFile.fileName, this.currentCaretPosition);
+
+                // @ts-ignore
+                console.log("[renameInfo]", renameInfo);
+
                 if (!renameInfo.canRename) {
                     this.raiseError("Expected rename to succeed, but it actually failed.");
                     break;
@@ -1468,6 +1472,9 @@ namespace FourSlash {
 
                 const references = this.languageService.findRenameLocations(
                     this.activeFile.fileName, this.currentCaretPosition, findInStrings, findInComments, providePrefixAndSuffixTextForRename);
+
+                // @ts-ignore
+                console.log("[references]", references);
 
                 const sort = (locations: readonly ts.RenameLocation[] | undefined) =>
                     locations && ts.sort(locations, (r1, r2) => ts.compareStringsCaseSensitive(r1.fileName, r2.fileName) || r1.textSpan.start - r2.textSpan.start);
