@@ -651,6 +651,7 @@ namespace ts {
             getSuggestedSymbolForNonexistentModule,
             getSuggestionForNonexistentExport,
             getSuggestedSymbolForNonexistentClassMember,
+            getSuggestedTypeForNonexistentStringLiteralType,
             getBaseConstraintOfType,
             getDefaultFromTypeParameter: type => type && type.flags & TypeFlags.TypeParameter ? getDefaultFromTypeParameter(type as TypeParameter) : undefined,
             resolveName(name, location, meaning, excludeGlobals) {
@@ -17741,7 +17742,7 @@ namespace ts {
                     }
                     else {
                         if (source.flags & TypeFlags.StringLiteral && target.flags & TypeFlags.Union) {
-                            const suggestedType = getSuggestedTypeForNonexistentStringLiteralType(source as StringLiteralType, target as UnionType);
+                            const suggestedType = getSuggestedTypeForNonexistentStringLiteralType((source as StringLiteralType).value, target as UnionType);
                             if (suggestedType) {
                                 reportError(Diagnostics.Type_0_is_not_assignable_to_type_1_Did_you_mean_2, sourceType, targetType, typeToString(suggestedType));
                                 return;
@@ -28134,9 +28135,9 @@ namespace ts {
             return suggestion;
         }
 
-        function getSuggestedTypeForNonexistentStringLiteralType(source: StringLiteralType, target: UnionType): StringLiteralType | undefined {
+        function getSuggestedTypeForNonexistentStringLiteralType(source: string, target: UnionType): StringLiteralType | undefined {
             const candidates = target.types.filter((type): type is StringLiteralType => !!(type.flags & TypeFlags.StringLiteral));
-            return getSpellingSuggestion(source.value, candidates, (type) => type.value);
+            return getSpellingSuggestion(source, candidates, (type) => type.value);
         }
 
         /**

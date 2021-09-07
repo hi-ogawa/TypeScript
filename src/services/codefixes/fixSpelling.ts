@@ -14,6 +14,7 @@ namespace ts.codefix {
         Diagnostics.No_overload_matches_this_call.code,
         // for JSX FC
         Diagnostics.Type_0_is_not_assignable_to_type_1.code,
+        Diagnostics.Type_0_is_not_assignable_to_type_1_Did_you_mean_2.code,
     ];
     registerCodeFix({
         errorCodes,
@@ -82,6 +83,17 @@ namespace ts.codefix {
             const baseType = baseTypeNode ? checker.getTypeAtLocation(baseTypeNode) : undefined;
             if (baseType) {
                 suggestedSymbol = checker.getSuggestedSymbolForNonexistentClassMember(getTextOfNode(node), baseType);
+            }
+        }
+        else if (errorCode === Diagnostics.Type_0_is_not_assignable_to_type_1_Did_you_mean_2.code && isStringLiteral(node)) {
+            const target = checker.getContextualType(node);
+            // @ts-ignore
+            console.log("[getInfo (node)]", node);
+            // @ts-ignore
+            console.log("[getInfo (target)]", target);
+            if (target && target.flags & TypeFlags.Union) {
+                const suggestedType = checker.getSuggestedTypeForNonexistentStringLiteralType(node.text, target as UnionType)
+                suggestedSymbol = suggestedType?.symbol;
             }
         }
         else {
