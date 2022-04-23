@@ -1,0 +1,24 @@
+=== tests/cases/compiler/controlFlowCommaExpressionAssertionRhs.ts ===
+declare function assertIsNumber(x: any): asserts x is number;
+>assertIsNumber : Symbol(assertIsNumber, Decl(controlFlowCommaExpressionAssertionRhs.ts, 0, 0))
+>x : Symbol(x, Decl(controlFlowCommaExpressionAssertionRhs.ts, 0, 32))
+>x : Symbol(x, Decl(controlFlowCommaExpressionAssertionRhs.ts, 0, 32))
+
+declare const x1: any;
+>x1 : Symbol(x1, Decl(controlFlowCommaExpressionAssertionRhs.ts, 2, 13))
+
+declare const x2: any;
+>x2 : Symbol(x2, Decl(controlFlowCommaExpressionAssertionRhs.ts, 3, 13))
+
+assertIsNumber(x1), assertIsNumber(x2);
+>assertIsNumber : Symbol(assertIsNumber, Decl(controlFlowCommaExpressionAssertionRhs.ts, 0, 0))
+>x1 : Symbol(x1, Decl(controlFlowCommaExpressionAssertionRhs.ts, 2, 13))
+>assertIsNumber : Symbol(assertIsNumber, Decl(controlFlowCommaExpressionAssertionRhs.ts, 0, 0))
+>x2 : Symbol(x2, Decl(controlFlowCommaExpressionAssertionRhs.ts, 3, 13))
+
+x1;
+>x1 : Symbol(x1, Decl(controlFlowCommaExpressionAssertionRhs.ts, 2, 13))
+
+x2;
+>x2 : Symbol(x2, Decl(controlFlowCommaExpressionAssertionRhs.ts, 3, 13))
+
